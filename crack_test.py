@@ -1,50 +1,50 @@
-# 读取 灰度化 高斯滤波
-import cv2
-
-img = cv2.imread("image/t5.png")
-
-# 灰度化
-gray = cv2.cvtColor(img , cv2.COLOR_BGR2GRAY)
-
-print("原图尺寸：" , img.shape)
-print("灰度图尺寸：" , gray.shape)
-
-cv2.imshow("Gray Image", gray)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-# 保存灰度图
-cv2.imwrite("./gray.png", gray)
-
-# 高斯滤波
-
-blurred = cv2.GaussianBlur(gray , (5,5) , 0)
-
-cv2.imshow("Blurred image" , blurred)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-cv2.imwrite("./blurred.png" , blurred)
-
-# 阈值二值化
-_,binary = cv2.threshold(blurred , 150,255 , cv2.THRESH_BINARY)
-
-cv2.imshow("Binary image" , binary)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-
-cv2.imwrite("./binary.png" , binary)
-
-
-edges = cv2.Canny(blurred , 80 , 200)
-
-cv2.imshow("Edges", edges)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
-cv2.imwrite("./edges.png", edges)
-print("边缘检测完成")
+# # 读取 灰度化 高斯滤波
+# import cv2
+#
+# img = cv2.imread("image/t5.png")
+#
+# # 灰度化
+# gray = cv2.cvtColor(img , cv2.COLOR_BGR2GRAY)
+#
+# print("原图尺寸：" , img.shape)
+# print("灰度图尺寸：" , gray.shape)
+#
+# cv2.imshow("Gray Image", gray)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+#
+# # 保存灰度图
+# cv2.imwrite("./gray.png", gray)
+#
+# # 高斯滤波
+#
+# blurred = cv2.GaussianBlur(gray , (5,5) , 0)
+#
+# cv2.imshow("Blurred image" , blurred)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+#
+# cv2.imwrite("./blurred.png" , blurred)
+#
+# # 阈值二值化
+# _,binary = cv2.threshold(blurred , 150,255 , cv2.THRESH_BINARY)
+#
+# cv2.imshow("Binary image" , binary)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+#
+#
+# cv2.imwrite("./binary.png" , binary)
+#
+#
+# edges = cv2.Canny(blurred , 80 , 200)
+#
+# cv2.imshow("Edges", edges)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+#
+# cv2.imwrite("./edges.png", edges)
+# print("边缘检测完成")
 
 # import cv2
 #
@@ -63,6 +63,7 @@ print("边缘检测完成")
 #
 # cv2.imwrite("./edges.png", edges)
 # print("边缘检测完成")
+
 import cv2
 import numpy as np
 import datetime
@@ -72,7 +73,10 @@ import glob
 # # ============ 配置参数 ============
 PIXELS_PER_MM = 12
 MIN_AREA = 100
-
+ADAPTIVE_BLOCK_SIZE = 11  # 自适应阈值块大小
+ADAPTIVE_C = 2            # 自适应阈值常数
+MORPH_KERNEL_SIZE = 3     # 形态学结构元素大小
+MORPH_ITERATIONS = 2      # 膨胀迭代次数
 # ============ 找到所有图片 ============
 # 直接读取当前目录下的所有 png 图片
 # image_files = glob.glob("*.png")
@@ -105,6 +109,27 @@ for img_path in image_files:
     contours , _ = cv2.findContours(edges , cv2.RETR_EXTERNAL , cv2.CHAIN_APPROX_SIMPLE)
     print("检测到" , len(contours) , "个轮廓")
 
+#自适应阈值
+    adaptive = cv2.adaptiveThreshold(
+        blurred,
+        255,
+        cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+        cv2.THRESH_BINARY,
+        11,
+        2
+    )
+
+#形态学操作
+    kernel = np.ones((3, 3), np.uint8)
+    # # 膨胀：让白色区域变大
+    dilated = cv2.dilate(adaptive, kernel, iterations=2)
+    # # 腐蚀：让白色区域变小
+    eroded = cv2.erode(dilated, kernel, iterations=1)
+    # # 开运算：先腐蚀后膨胀（去噪）
+    opening = cv2.morphologyEx(adaptive, cv2.MORPH_OPEN, kernel)
+    # # 闭运算：先膨胀后腐蚀（填充缺口）
+    closing = cv2.morphologyEx(adaptive, cv2.MORPH_CLOSE, kernel)
+
 # 在原图上画出轮廓
     img_copy = img.copy()
     cv2.drawContours(img_copy , contours , -1 , (0 , 255 , 0) , 2)
@@ -114,6 +139,17 @@ for img_path in image_files:
     cv2.destroyAllWindows()
 
     cv2.imwrite("./countours.png" , img_copy)
+
+    cv2.imshow("Adaptive Threshold" , adaptive)
+    cv2.imshow("Original", adaptive)
+    cv2.imshow("Dilated", dilated)
+    cv2.imshow("Eroded", eroded)
+    cv2.imshow("Opening", opening)
+    cv2.imshow("Closing", closing)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+    cv2.imwrite("./morphology.png", closing)
 
     crack_count = 0
 
@@ -133,18 +169,17 @@ for img_path in image_files:
         area = cv2.contourArea(contour)
         if area > 100:
              print(f"轮廓{i}: 长度={length:.2f}像素，面积={area:.2f}像素²")
-    if area > MIN_AREA:
-        length_mm = length / PIXELS_PER_MM
-        width = area / (length / 2)
-        width_mm = width / PIXELS_PER_MM
+        if area > MIN_AREA:
+            length_mm = length / PIXELS_PER_MM
+            width = area / (length / 2)
+            width_mm = width / PIXELS_PER_MM
 
-        report.append(f"裂缝{crack_count}:")
-        report.append(f"  长度：{length_mm:.2f}mm({length:.2f}像素)")
-        report.append(f"  平均宽度：{width_mm:.2f}mm({width:.2f}像素)")
-        report.append(f"  面积:{area:.2f}像素")
+            crack_count += 1
 
-        crack_count += 1
-
+    report.append(f"裂缝{crack_count}:")
+    report.append(f"  长度：{length_mm:.2f}mm({length:.2f}像素)")
+    report.append(f"  平均宽度：{width_mm:.2f}mm({width:.2f}像素)")
+    report.append(f"  面积:{area:.2f}像素")
     report.append("="*50)
     report.append(f"共检测到{crack_count}条有效裂缝")
 
@@ -165,3 +200,79 @@ print("\n" + " = " * 50)
 print("批量处理完成！")
 print("总报告已保存：batch_report.txt")
 
+
+
+# import cv2
+#
+# # 读取 → 灰度
+# img = cv2.imread("./images/t5.png")
+# gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+#
+# # 高斯滤波（自适应阈值需要平滑的图）
+# blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+#
+# # 自适应阈值
+# # 参数：图片，最大值，自适应方法，阈值类型，块大小，常数 C
+# adaptive = cv2.adaptiveThreshold(
+#     blurred,
+#     255,
+#     cv2.ADAPTIVE_THRESH_GAUSSIAN_C,  # 高斯加权
+#     cv2.THRESH_BINARY_INV,            # 反转（裂缝变白色）
+#     11,                               # 块大小（必须是奇数）
+#     2                                 # 常数 C（从阈值中减去）
+# )
+#
+# cv2.imshow("Adaptive Threshold", adaptive)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+#
+# cv2.imwrite("./adaptive.png", adaptive)
+
+
+#
+# import cv2
+# import numpy as np
+# #读取->灰度->高斯滤波
+# img = cv2.imread("./image/t5.png")
+# gray = cv2.cvtColor(img , cv2.COLOR_BGR2GRAY)
+# blurred = cv2.GaussianBlur(gray , (5 , 5) , 0)
+#
+# # # 自适应阈值
+# # # 参数：图片，最大值，自适应方法，阈值类型，块大小，常数 C
+# adaptive = cv2.adaptiveThreshold(
+#     blurred,
+#     255,
+#     cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+#     cv2.THRESH_BINARY,
+#     11,
+#     2
+# )
+#
+# cv2.imshow("Adaptive Threshold" , adaptive)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+#
+# cv2.imwrite("./adaptive.png" , adaptive)
+#
+# # # 读取自适应阈值结果
+# adaptive = cv2.imread("./adaptive.png" , cv2.IMREAD_GRAYSCALE)
+# # # 定义结构元素（3x3 的正方形）
+# kernel = np.ones((3 , 3) , np.uint8)
+# # # 膨胀：让白色区域变大
+# dilated = cv2.dilate(adaptive , kernel , iterations = 2)
+# # # 腐蚀：让白色区域变小
+# eroded = cv2.erode(dilated , kernel , iterations = 1)
+# # # 开运算：先腐蚀后膨胀（去噪）
+# opening = cv2.morphologyEx(adaptive , cv2.MORPH_OPEN , kernel)
+# # # 闭运算：先膨胀后腐蚀（填充缺口）
+# closing = cv2.morphologyEx(adaptive , cv2.MORPH_CLOSE , kernel)
+#
+# cv2.imshow("Original", adaptive)
+# cv2.imshow("Dilated", dilated)
+# cv2.imshow("Eroded", eroded)
+# cv2.imshow("Opening", opening)
+# cv2.imshow("Closing", closing)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+#
+# cv2.imwrite("./morphology.png", closing)
