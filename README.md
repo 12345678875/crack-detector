@@ -1,14 +1,23 @@
-水工混凝土裂缝检测 AI 系统
+#项目简介
+使用 OpenCV 进行裂缝自动检测，计算裂缝长度和宽度，生成检测报告。
 
-作者：棒棒
-学校：华北水利水电大学
-目标：本学期完成裂缝检测系统，暑假找 AI 实习
+#技术栈
+Python 3.9
+OpenCV 4.x
+NumPy
+Git
 
-技术栈
-OpenCV：图像预处理
-PyTorch：深度学习模型
--Flask：后端 API
+#功能
+图像预处理（灰度化、滤波、边缘检测）
+裂缝轮廓提取
+裂缝长度/宽度计算
+批量处理多张图片
+自动生成检测报告
 
-运行方法
+# 运行方法
 bash
+1. 安装依赖
+pip install opencv-python numpy
+2. 把裂缝照片放到 images/ 文件夹
+3. 运行
 python crack_test.py
