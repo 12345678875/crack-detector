@@ -98,7 +98,6 @@ for img_path in image_files:
         print("  跳过：无法读取")
         continue
 
-
 # 读取 → 灰度 → 滤波 → 边缘检测
     img = cv2.imread(img_path)
     gray = cv2.cvtColor(img , cv2.COLOR_BGR2GRAY)
