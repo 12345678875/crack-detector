@@ -95,7 +95,7 @@ with gr.Blocks(title = "AI裂缝检测系统") as demo:
 
     gr.Markdown("====")
     gr.Markdown(
-        "作者 : 棒 棒 | 学校 : 华北水利水电大学 | Github : [crack-detector](https://github.com/12345678875/crack-detector)"
+        "作者 : 棒 棒 | 学校 : 索菲亚大学 | Github : [crack-detector](https://github.com/12345678875/crack-detector)"
     )
 
 # ============ 启动应用 ============
