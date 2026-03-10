@@ -1,132 +1,147 @@
 # AI Crack Detection System
-An AI-assisted concrete crack detection system built with **Python, OpenCV, and Gradio**.
-This project detects cracks in uploaded images and estimates their **length and width**, providing a visual detection result and a textual report.
 
-## Demo
-Upload a crack image and the system will:
+A computer vision project for **automatic crack detection** using **OpenCV and PyTorch CNN**.
 
-* Detect crack contours
-* Estimate crack **length** and **average width**
-* Display the **annotated image**
-* Generate a **detection report**
+This project implements a full pipeline including:
 
-## Features
+* Image preprocessing
+* Crack feature extraction
+* CNN-based crack classification
+* Gradio visualization interface
+* Automatic detection reports
 
-* Image preprocessing (grayscale, Gaussian blur)
-* Edge detection using **Canny**
-* Adaptive threshold segmentation
-* Morphological operations for noise reduction
-* Crack contour detection
-* Crack length and width estimation
-* Visual result output
-* Automatic detection report
-* Web interface built with **Gradio**
+This system can be applied to:
 
-## Project Structure
+* Road crack inspection
+* Concrete structure monitoring
+* Bridge health monitoring
+* Infrastructure safety inspection
 
-crack-detector
-│
-├── app.py              # Main application (Gradio interface)
-├── image/              # Test images
-├── results/            # Output results (optional)
-├── README.md           # Project documentation
-└── requirements.txt    # Python dependencies
+---
 
-## Installation
-Clone this repository:
-bash
-git clone https://github.com/12345678875/crack-detector.git
-cd crack-detector
+# Project Demo
 
-Install dependencies:
-bash
-pip install -r requirements.txt
+## Input Image
 
-If you don't have a requirements file yet, install manually:
+Crack image captured from the dataset.
 
-bash
-pip install opencv-python numpy gradio
+## Processing Pipeline
 
-## Usage
-Run the application:
-bash
-python app.py
+Image preprocessing includes:
 
-After running, open the local web interface:
+* Grayscale conversion
+* Gaussian filtering
+* Edge detection (Canny)
+* Morphological processing
 
-http://127.0.0.1:7860
+## Detection Result
 
-Upload a crack image and click **Start Detection**.
+The system automatically detects cracks and outputs detection results.
 
-The system will display:
+---
 
-* Detected crack contours
-* Crack length and width estimation
-* Detection report
+# Tech Stack
 
-## Detection Pipeline
-
-The crack detection workflow:
-
-Input Image
-    ↓
-Grayscale Conversion
-    ↓
-Gaussian Blur
-    ↓
-Canny Edge Detection
-    ↓
-Adaptive Threshold
-    ↓
-Morphological Closing
-    ↓
-Contour Detection
-    ↓
-Crack Measurement
-
-## Crack Measurement
-
-The crack length and width are estimated using contour properties:
-
-* **Length:** contour perimeter
-* **Width:** calculated from area and length approximation
-
-Conversion:
-
-mm = pixel / PIXELS_PER_MM
-
-Note:
-PIXELS_PER_MM` must be calibrated according to the real camera setup.
-
-## Example Output
-
-Detection result includes:
-
-* Crack contour visualization
-* Crack count
-* Crack length (mm)
-* Average crack width (mm)
-* Detection timestamp
-
-## Technologies Used
+This project uses the following technologies:
 
 * Python
 * OpenCV
+* PyTorch
 * NumPy
 * Gradio
+* SciPy
+* Pillow
 
-## Author
+---
 
-Bang Bang
-North China University of Water Resources and Electric Power
+# Project Structure
 
-GitHub:
-https://github.com/12345678875/crack-detector
+```
+crack-detector
+│
+├── app
+│   └── app.py
+│
+├── models
+│   └── crack_cnn.py
+│
+├── training
+│   ├── train.py
+│   └── dataset.py
+│
+├── image_processing
+│   └── crack_detection.py
+│
+├── docs
+│   └── images
+│
+├── results
+│   └── reports
+│
+├── requirements.txt
+└── README.md
+```
 
-## Future Improvements
+---
 
-* Crack segmentation using **Deep Learning (U-Net / YOLOv8)**
-* Crack width precision improvement
-* Batch image detection
-* Dataset training support
-* Deployment as a web service
+# Installation
+
+Clone the repository:
+
+```
+git clone https://github.com/12345678875/crack-detector.git
+cd crack-detector
+```
+
+Install dependencies:
+
+```
+pip install -r requirements.txt
+```
+
+---
+
+# Train the Model
+
+Run the training script:
+
+```
+python training/train.py
+```
+
+The CNN model will be trained on the CrackForest dataset.
+
+---
+
+# Run the Detection System
+
+Start the Gradio interface:
+
+```
+python run_app.py
+```
+
+Then open the browser:
+
+```
+http://127.0.0.1:7860
+```
+
+Upload an image to perform crack detection.
+
+---
+
+# Dataset
+
+This project uses the **CrackForest Dataset**, a commonly used dataset for road crack detection research.
+
+Dataset link:
+
+https://github.com/cuilimeng/CrackForest-dataset
+
+---
+
+# Author
+
+Yan Shiyi
+AI Crack Detection Project
