@@ -18,8 +18,6 @@ class CrackCNN(nn.Module):
         x = self.fc(self.relu(x))
         return x
 
-#
-#
 def load_model(model_path , num_classes = 2 , device = 'cpu'):
     """加载训练好的模型"""
     model = CrackCNN(num_classes = num_classes)
